@@ -2,7 +2,7 @@
 
 A Terraform Project used to Boostrap setting up components in a Sandbox Cloud Environment (AWS, Azure, GCP). In particular, a Sandbox Cloud Envionrment that gets destroyed after X number of hours and you needto restart.
 
-# Prerequisites
+# Pre-Requisits
 
 ### Clone the Repository to your Machine
 ```
