@@ -78,3 +78,20 @@ Delete State Files:
 ```
 sh clear_tfstates.sh
 ```
+
+# Other Useful Commands
+
+## Azure CLI
+
+Show the Azure Subscription you are currently configured to access from Azure CLI
+```
+az account show
+```
+
+## Terraform
+
+Destroy specific resources:
+```
+terraform destroy --target {terraform-resource-id}
+```
+Useful if you want to refresh a specific resource
