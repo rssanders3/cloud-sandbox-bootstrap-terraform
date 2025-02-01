@@ -22,10 +22,10 @@ terraform {
 variable "default_labels" {
   type    = map(string)
   default = {
-    Environment = "Sandbox"
-    Owner       = "Terraform"
-    Purpose     = "Resource created for Sandbox & Testing"
-    Project     = "cloud-sandbox-bootstrap-terraform.gcp-k8s-setup"
+    environment = "sandbox"
+    owner       = "terraform"
+    purpose     = "resource_created_for_testing"
+    project     = "cloud-sandbox-bootstrap-terraform_gcp-k8s-setup"
   }
 }
 
@@ -40,6 +40,7 @@ resource "google_container_cluster" "cluster" {
   remove_default_node_pool  = true
   initial_node_count        = 1
   deletion_protection       = false
+  resource_labels           = var.default_labels
 
   networking_mode = "VPC_NATIVE"
 }
@@ -56,7 +57,6 @@ resource "google_container_node_pool" "primary_nodes" {
     oauth_scopes = [
       "https://www.googleapis.com/auth/cloud-platform"
     ]
-    labels = var.default_labels
   }
 }
 
