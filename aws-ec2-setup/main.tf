@@ -97,8 +97,8 @@ resource "aws_instance" "ec2_instance" {
   associate_public_ip_address = true
   subnet_id                   = aws_subnet.subnet.id
   key_name                    = aws_key_pair.key_pair.key_name
-  vpc_security_group_ids = [aws_security_group.security_group.id]
-  user_data = <<EOF
+  vpc_security_group_ids      = [aws_security_group.security_group.id]
+  user_data                   = <<EOF
     #!/bin/bash
     sudo yum update -y
     sudo yum install git -y

@@ -13,14 +13,14 @@ variable "node_count" {
 terraform {
   required_providers {
     google = {
-      source = "hashicorp/google"
+      source  = "hashicorp/google"
       version = "6.18.1"
     }
   }
 }
 
 variable "default_labels" {
-  type    = map(string)
+  type = map(string)
   default = {
     environment = "sandbox"
     owner       = "terraform"
@@ -35,12 +35,12 @@ provider "google" {
 }
 
 resource "google_container_cluster" "cluster" {
-  name                      = "cluster"
-  location                  = var.region
-  remove_default_node_pool  = true
-  initial_node_count        = 1
-  deletion_protection       = false
-  resource_labels           = var.default_labels
+  name                     = "cluster"
+  location                 = var.region
+  remove_default_node_pool = true
+  initial_node_count       = 1
+  deletion_protection      = false
+  resource_labels          = var.default_labels
 
   networking_mode = "VPC_NATIVE"
 }
