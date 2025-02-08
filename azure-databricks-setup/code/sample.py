@@ -1,0 +1,1 @@
+spark.read.table("default.titanic_passengers_raw").show()
