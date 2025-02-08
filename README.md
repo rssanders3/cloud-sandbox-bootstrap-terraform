@@ -95,3 +95,9 @@ Destroy specific resources:
 terraform destroy --target {terraform-resource-id}
 ```
 Useful if you want to refresh a specific resource
+
+Format Terraform files:
+```
+terraform fmt
+```
+Beautify your Terraform
