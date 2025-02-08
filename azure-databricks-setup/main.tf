@@ -100,7 +100,7 @@ resource "databricks_sql_table" "titanic_passengers_raw" {
   table_type         = "MANAGED"
   data_source_format = "CSV"
   storage_location   = databricks_dbfs_file.titanic_passengers_raw_csv.dbfs_path
-  cluster_id = databricks_cluster.cluster.id
+  cluster_id         = databricks_cluster.cluster.id
   column {
     name = "PassengerId"
     type = "int"
