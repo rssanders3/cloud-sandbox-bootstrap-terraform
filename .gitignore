@@ -39,3 +39,9 @@ terraform.rc
 
 # Ignore private folder containing any user specific files/notes
 .private/
+
+# Environment files
+.env
+
+# Log files
+*.log

@@ -77,6 +77,13 @@ data "databricks_spark_version" "latest_lts" {
 data "databricks_current_user" "user" {
 }
 
+# Databricks Access Toekn
+resource "databricks_token" "personal_token" {
+  comment  = "Provisioned by Terraform"
+  // 100 day token
+  lifetime_seconds = 8640000
+}
+
 # Databricks Shared Cluster
 resource "databricks_cluster" "cluster" {
   cluster_name            = "Cluster"
@@ -92,69 +99,6 @@ resource "databricks_dbfs_file" "titanic_passengers_raw_csv" {
   path   = "/mnt/data/titanic_passengers_raw.csv"
 }
 
-# Create a SQL Table from the CSV file
-resource "databricks_sql_table" "titanic_passengers_raw" {
-  name               = "titanic_passengers_raw"
-  catalog_name       = "hive_metastore"
-  schema_name        = "default"
-  table_type         = "MANAGED"
-  data_source_format = "CSV"
-  storage_location   = databricks_dbfs_file.titanic_passengers_raw_csv.dbfs_path
-  cluster_id         = databricks_cluster.cluster.id
-  column {
-    name = "PassengerId"
-    type = "int"
-  }
-  column {
-    name = "Survived"
-    type = "int"
-  }
-  column {
-    name = "Pclass"
-    type = "int"
-  }
-  column {
-    name = "Name"
-    type = "string"
-  }
-  column {
-    name = "Sex"
-    type = "string"
-  }
-  column {
-    name = "Age"
-    type = "int"
-  }
-  column {
-    name = "SibSp"
-    type = "int"
-  }
-  column {
-    name = "Parch"
-    type = "string"
-  }
-  column {
-    name = "Ticket"
-    type = "string"
-  }
-  column {
-    name = "Fare"
-    type = "double"
-  }
-  column {
-    name = "Cabin"
-    type = "string"
-  }
-  column {
-    name = "Embarked"
-    type = "string"
-  }
-  options = {
-    "skiprows" = 1
-  }
-  comment = "Titanic Passengers Raw Data"
-}
-
 # Upload a sample notebook
 resource "databricks_notebook" "sample_ipynb" {
   source = "${path.module}/code/sample.ipynb"
@@ -165,4 +109,37 @@ resource "databricks_notebook" "sample_ipynb" {
 resource "databricks_notebook" "sample_py" {
   source = "${path.module}/code/sample.py"
   path   = "${data.databricks_current_user.user.home}/sample.py"
+}
+
+# Upload a python script to create a Test Table
+resource "databricks_notebook" "create_titanic_table_py" {
+  source = "${path.module}/code/create_titanic_table.py"
+  path   = "${data.databricks_current_user.user.home}/create_titanic_table.py"
+}
+
+
+resource "databricks_job" "create_titanic_table_job" {
+  name = "Create Titanic Table Job"
+
+  task {
+    task_key = "create_titanic_table"
+    description = "Job to create Titanic table from CSV file"
+    existing_cluster_id = databricks_cluster.cluster.id
+    notebook_task {
+      notebook_path = databricks_notebook.create_titanic_table_py.path
+    }
+  }
+}
+
+resource "null_resource" "trigger_create_titanic_table_job" {
+  provisioner "local-exec" {
+    command = <<EOT
+      databricks jobs run-now ${databricks_job.create_titanic_table_job.id}
+    EOT
+    environment = {
+      DATABRICKS_HOST  = azurerm_databricks_workspace.databricks_workspace.workspace_url
+      DATABRICKS_TOKEN = databricks_token.personal_token.token_value
+    }
+  }
+  depends_on = [databricks_job.create_titanic_table_job]
 }

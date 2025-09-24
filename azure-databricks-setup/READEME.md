@@ -5,7 +5,7 @@ Creates Azure resources that support a Databricks Workspace
 * Resource Group
 * Databricks Workspace
 * Databricks Cluster
-* Other Databricks Resources - Sample Notebook, Sample Data
+* Other Databricks Resources - Sample Notebook, Sample Data, Sample Table in Hive Metastore (Non-Unity Catalog)
 
 # Setup
 
@@ -34,6 +34,11 @@ terraform apply -target=azurerm_databricks_workspace.databricks_workspace
 5. Trigger Terraform to create the required resources in the Cloud Envionrment
 ```
 terraform apply
+```
+
+Auto Approve and Start Up all:
+```
+terraform apply -target=azurerm_databricks_workspace.databricks_workspace -auto-approve ; terraform apply -auto-approve 
 ```
 
 # Destory

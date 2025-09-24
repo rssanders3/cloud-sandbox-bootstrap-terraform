@@ -6,7 +6,8 @@ variable "availability_zone" {
   default = "us-east-1a"
 }
 variable "ec2_instance_ami" {
-  default = "ami-0df8c184d5f6ae949" # Amazon Linux 2023 AMI 2023.6.20250115.0 x86_64 HVM kernel-6.1
+  # Amazon Linux 2023 AMI 2023.6.20250115.0 x86_64 HVM kernel-6.1
+  default = "ami-0df8c184d5f6ae949"
 }
 variable "ec2_instance_type" {
   default = "t2.medium"
@@ -15,7 +16,7 @@ variable "local_public_key_path" {
   default = "~/.ssh/id_rsa.pub"
 }
 
-#
+
 terraform {
   required_providers {
     aws = {
@@ -30,6 +31,15 @@ terraform {
 # Configure the AWS Provider
 provider "aws" {
   region = var.region
+
+  default_tags {
+    tags = {
+      Environment = "Sandbox"
+      Owner       = "Terraform"
+      Purpose     = "Resource created for Testing"
+      Project     = "cloud-sandbox-bootstrap-terraform.aws-ec2-setup"
+    }
+  }
 }
 
 # Create a VPC
@@ -62,13 +72,20 @@ resource "aws_route_table_association" "route_table_association" {
 }
 
 resource "aws_security_group" "security_group" {
-  name        = "allow-ssh"
-  description = "Allow SSH inbound traffic"
+  name        = "allow-ssh-rdp"
+  description = "Allow SSH & RDP inbound traffic"
   vpc_id      = aws_vpc.vpc.id
 
   ingress {
     from_port   = 22
     to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  ingress {
+    from_port   = 3389
+    to_port     = 3389
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
@@ -80,15 +97,11 @@ resource "aws_security_group" "security_group" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
-  tags = {
-    Name = "ssh-access-sg"
-  }
 }
 
 resource "aws_key_pair" "key_pair" {
   key_name   = "my-key-pair"
   public_key = file(var.local_public_key_path)
-  #   public_key = file("~/.ssh/id_rsa.pub")
 }
 
 resource "aws_instance" "ec2_instance" {
@@ -101,9 +114,14 @@ resource "aws_instance" "ec2_instance" {
   user_data                   = <<EOF
     #!/bin/bash
     sudo yum update -y
+    sudo yum groupinstall "Development Tools" -y
     sudo yum install git -y
     sudo yum install gcc -y
+    sudo yum install make -y
   EOF
+  tags = {
+    Name = "Sandbox"
+  }
 }
 
 output "ec2_instance_public_ip" {
